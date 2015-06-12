@@ -20,6 +20,7 @@
      Documentation at /docs/config/server.html
  -->
 <Server port="8105" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
   <!-- Security listener. Documentation at /docs/config/listeners.html
   <Listener className="org.apache.catalina.security.SecurityListener" />
   -->
@@ -67,12 +68,25 @@
          APR (HTTP/AJP) Connector: /docs/apr.html
          Define a non-SSL HTTP/1.1 Connector on port 8080
     -->
-    <Connector port="<%= @port %>" protocol="HTTP/1.1"
+    <Connector port="<%= @port %>" protocol="org.apache.coyote.http11.Http11NioProtocol"
                connectionTimeout="60000"
                redirectPort="8543"
                useBodyEncodingForURI="true"
                address="<%= @address %>"
-    />
+               socket.txBufSize="64000"
+               socket.rxBufSize="64000"
+               tcpNoDelay="1"
+        />
+
+    <!-- Uncomment if connector with Http11NioProtocol does not work reliably  -->
+    <!--
+    <Connector port="8111" protocol="HTTP/1.1"
+               connectionTimeout="60000"
+               redirectPort="8543"
+               useBodyEncodingForURI="true"
+        />
+    -->
+
     <!-- A "Connector" using the shared thread pool-->
     <!--
     <Connector executor="tomcatThreadPool"
@@ -141,6 +155,14 @@
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="localhost_access_log." suffix=".txt"
                pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+        -->
+         <!-- Uncomment if Nginx or Apache server are installed in front of Tomcat server, see also http://confluence.jetbrains.com/display/TCD9/How+To...#HowTo...-proxySetup
+        <Valve
+            className="org.apache.catalina.valves.RemoteIpValve"
+            remoteIpHeader="x-forwarded-for"
+            protocolHeader="x-forwarded-proto"
+            internalProxies="192\.168\.0\.1"
+            />
         -->
       </Host>
     </Engine>
