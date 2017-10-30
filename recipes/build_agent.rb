@@ -2,7 +2,7 @@ include_recipe "teamcity_server::common"
 
 unless Chef::Config[:solo]
   unless node["teamcity_server"]["build_agent"]["server"]
-    server_node = search(:node, "recipes:teamcity_server\\:\\:server").first
+    server_node = search(:node, "chef_environment:#{node['riskmatch']['environment']} AND recipes:teamcity_server\\:\\:server").first
 
     if server_node
       node.default["teamcity_server"]["build_agent"]["server"] = server_node["ipaddress"]
