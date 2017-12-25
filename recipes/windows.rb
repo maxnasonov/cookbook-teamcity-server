@@ -9,23 +9,24 @@ agent_file = 'buildAgent.zip'
 src_path = "#{system_dir}.zip"
 service_name = 'TCBuildAgent'
 
-agent_uri = "http://teamcity.riskmatch.com:8111/update/#{agent_file}"
+agent_uri = "http://teamcity.int-riskmatch.com:8111/update/#{agent_file}"
 
 remote_file src_path do
   source agent_uri
-  not_if { ::File.exist?(config_path) }
+  not_if { ::File.exist?(config_dir) }
 end
 
 directory system_dir do
   action :create
   recursive true
-  not_if { ::File.exist?(config_path) }
+  not_if { ::File.exist?(config_dir) }
 end
 
 windows_zipfile system_dir do
   source src_path
+  overwrite true
   action :unzip
-  not_if { ::File.exist?(bin_path) }
+  not_if { ::File.exist?(bin_dir) }
 end
 
 unless Chef::Config[:solo]
@@ -42,7 +43,7 @@ unless node["teamcity_server"]["build_agent"]["server"]
   Chef::Application.fatal! "Undefined TeamCity server address"
 end
 
-properties_file     = "#{conf_dir}/buildAgent.properties"
+properties_file     = "#{config_dir}/buildAgent.properties"
 server              = node["teamcity_server"]["build_agent"]["server"]
 own_address         = node["ipaddress"]
 authorization_token = nil
@@ -81,9 +82,9 @@ template properties_file do
 end
 
 execute 'install teamcity service' do
-  command "#{bin_path}/service.install.bat"
+  command "#{bin_dir}/service.install.bat"
   action :run
-  cwd bin_path
+  cwd bin_dir
   not_if { ::Win32::Service.exists?(service_name) }
 end
 
